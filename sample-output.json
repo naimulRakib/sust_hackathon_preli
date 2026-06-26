@@ -1,0 +1,16 @@
+{
+    "ticket_id": "TKT-001",
+    "relevant_transaction_id": "TXN-9101",
+    "evidence_verdict": "consistent",
+    "case_type": "wrong_transfer",
+    "severity": "high",
+    "department": "dispute_resolution",
+    "agent_summary": "Customer complaint regarding transaction TXN-9101 has been received and requires review.",
+    "recommended_next_action": "Review the ticket manually and follow standard escalation procedures.",
+    "customer_reply": "We have received your concern regarding transaction TXN-9101. Our team will review your case and contact you through official support channels. Please do not share your PIN, OTP, or password with anyone.",
+    "human_review_required": true,
+    "confidence": 0.95,
+    "reason_codes": [
+        "rules_fallback"
+    ]
+}
