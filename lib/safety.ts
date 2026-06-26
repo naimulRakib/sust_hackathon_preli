@@ -1,15 +1,19 @@
 import { AIAnalysisOutput } from './schema';
 
 const UNSAFE_REPLY_PATTERNS = [
-  // Never ask for credentials
-  { pattern: /\b(please\s+)?(share|provide|send|give|enter|type)\s+(your\s+)?(pin|otp|password|card\s+number|cvv)\b/i, penalty: 'CREDENTIAL_REQUEST' },
+  // RULE 1: Never ask for credentials
+  // BUG C FIX: Negative lookahead prevents "do not share your PIN" from being flagged
+  // BUG B FIX: Broader pattern allows 'send us your X' and 'provide X' with any filler
+  { pattern: /\b(?<!do not |don't |never |please do not |please never )(please\s+)?(share|provide|send|give|enter|type)\b.{0,30}?\b(pin|otp|password|card\s*number|cvv)\b/i, penalty: 'CREDENTIAL_REQUEST' },
   { pattern: /\b(আপনার\s+)?(পিন|ওটিপি|পাসওয়ার্ড)\s+(দিন|শেয়ার|পাঠান)\b/i, penalty: 'CREDENTIAL_REQUEST' },
-  // Never confirm unauthorized refunds
+  // RULE 2: Never confirm unauthorized refunds/reversals
+  // BUG D FIX: Use flexible pattern that matches 'a full refund', 'the refund', etc.
   { pattern: /\bwe\s+will\s+(refund|reverse|return|give\s+back|transfer\s+back)\b/i, penalty: 'UNAUTHORIZED_REFUND' },
   { pattern: /\byour\s+money\s+(will\s+be|has\s+been)\s+(refunded|returned|reversed)\b/i, penalty: 'UNAUTHORIZED_REFUND' },
   { pattern: /\bwe\s+(have|will)\s+(refunded|reversed|credited)\b/i, penalty: 'UNAUTHORIZED_REFUND' },
-  { pattern: /\bguarantee\s+(a\s+)?(refund|reversal)\b/i, penalty: 'UNAUTHORIZED_REFUND' },
-  // Never send to third parties
+  { pattern: /\bguarantee\b.{0,20}\b(refund|reversal)\b/i, penalty: 'UNAUTHORIZED_REFUND' },
+  { pattern: /\bwill\s+be\s+refunded\b/i, penalty: 'UNAUTHORIZED_REFUND' },
+  // RULE 3: Never send to third parties
   { pattern: /\bcontact\s+(third|external|outside|another)\b/i, penalty: 'THIRD_PARTY_REDIRECT' },
 ];
 

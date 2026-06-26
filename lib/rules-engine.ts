@@ -454,24 +454,29 @@ export function computeSignals(req: TicketRequest): RulesSignals {
   if (isPhishing) {
     detectedCaseType = 'phishing_or_social_engineering';
   } else {
+    // BUG E FIX: Check merchant/settlement BEFORE wrong_transfer to prevent
+    // "not received my funds" from triggering wrong_transfer for merchants.
     const dupTxnId = detectDuplicatePayment(history);
     if (dupTxnId && containsAny(complaint, DUPLICATE_KEYWORDS)) {
+      // BUG A FIX: duplicate_payment requires BOTH keyword AND data confirmation
       detectedCaseType = 'duplicate_payment';
+    } else if ((containsAny(complaint, MERCHANT_SETTLEMENT_KEYWORDS) || isMerchant) &&
+               history.some(t => t.type === 'settlement')) {
+      detectedCaseType = 'merchant_settlement_delay';
+    } else if (containsAny(complaint, AGENT_CASH_IN_KEYWORDS) || isAgent) {
+      if (history.some(t => t.type === 'cash_in')) {
+        detectedCaseType = 'agent_cash_in_issue';
+      } else if (containsAny(complaint, AGENT_CASH_IN_KEYWORDS)) {
+        detectedCaseType = 'agent_cash_in_issue';
+      }
     } else if (containsAny(complaint, WRONG_TRANSFER_KEYWORDS)) {
       detectedCaseType = 'wrong_transfer';
     } else if (containsAny(complaint, PAYMENT_FAILED_KEYWORDS)) {
       detectedCaseType = 'payment_failed';
-    } else if (containsAny(complaint, AGENT_CASH_IN_KEYWORDS)) {
-      detectedCaseType = 'agent_cash_in_issue';
-    } else if (containsAny(complaint, MERCHANT_SETTLEMENT_KEYWORDS) || isMerchant) {
-      if (history.some(t => t.type === 'settlement')) {
-        detectedCaseType = 'merchant_settlement_delay';
-      }
     } else if (containsAny(complaint, REFUND_KEYWORDS)) {
       detectedCaseType = 'refund_request';
-    } else if (containsAny(complaint, DUPLICATE_KEYWORDS)) {
-      detectedCaseType = 'duplicate_payment';
     }
+    // NOTE: duplicate_payment without data evidence is intentionally NOT set from keyword alone
   }
 
   // Transaction matching
