@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "test": "jest --testEnvironment=node",
     "test:sample": "jest tests/sample-cases.test.ts --verbose",
     "test:edge": "jest tests/edge-cases.test.ts --verbose",
