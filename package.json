@@ -8,6 +8,8 @@
     "test": "jest --testEnvironment=node",
     "test:sample": "jest tests/sample-cases.test.ts --verbose",
     "test:edge": "jest tests/edge-cases.test.ts --verbose",
+    "test:live": "node scripts/live-api-tests.mjs https://sust-hackathon-preli-blush.vercel.app",
+    "test:live:local": "node scripts/live-api-tests.mjs http://localhost:3000",
     "dev": "vercel dev",
     "start": "vercel dev"
   },
